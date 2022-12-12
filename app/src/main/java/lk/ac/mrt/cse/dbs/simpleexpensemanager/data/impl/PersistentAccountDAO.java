@@ -79,6 +79,9 @@ public class PersistentAccountDAO implements AccountDAO {
         // specific implementation based on the transaction type
         switch (expenseType) {
             case EXPENSE:
+                if(amount>account.getBalance()){
+                    throw new InvalidAccountException("Insufficient balance!");
+                }
                 account.setBalance(account.getBalance() - amount);
                 break;
             case INCOME:
@@ -86,6 +89,10 @@ public class PersistentAccountDAO implements AccountDAO {
                 break;
         }
         accounts.put(accountNo, account);
+        // updating the balance in the database.
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("balance",account.getBalance());
+        sqLiteDatabase.update("user_account",contentValues,"accountNo=?",new String[]{accountNo});
     }
 
     public void loadAccountData(){
